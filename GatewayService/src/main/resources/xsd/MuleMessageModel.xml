@@ -1,0 +1,98 @@
+
+WARN 2016-03-14 14:10:54,820
+[[JourneyRouteManagement].RouteDispatcher.stage1.02]
+org.mule.api.processor.LoggerMessageProcessor: *****************inside
+route Dispatcher 1<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:messageType xmlns:ns5="http://www.srk.org/MuleMessageModel/"
+	xmlns:ns2="http://www.srk.org/exception/" xmlns:ns4="http://www.srk.org/IVSUserManagement/"
+	xmlns:ns3="http://www.srk.org/IVSJourneyManagement/">
+	<Header>
+		<From>
+			<SenderId>NCName</SenderId>
+			<CreateDateTime>2016-03-14T13:45:05.259+05:30</CreateDateTime>
+		</From>
+		<UserSession>
+			<UserId>UserId</UserId>
+			<SessionId>SessionId</SessionId>
+		</UserSession>
+		<MessageProperties>
+			<MessageId>MessageId</MessageId>
+			<Timestamp>2001-12-31T12:00:00</Timestamp>
+			<CorrelationId>CorrelationId</CorrelationId>
+		</MessageProperties>
+		<MessageIdentification>
+			<MessageDomain>Journey</MessageDomain>
+			<MessageType>AuthenticateUser</MessageType>
+			<MessageSubtype>CREATE</MessageSubtype>
+			<MessageEnvironment>DEVELOPMENT</MessageEnvironment>
+		</MessageIdentification>
+		<ESBServices>
+			<serviceName>JourneyRouteMangament</serviceName>
+			<dateTimeIn>2016-03-14T14:10:54.780+05:30</dateTimeIn>
+			<status>IN_PROGRESS</status>
+		</ESBServices>
+	</Header>
+	<Body>
+		<ns2:Exception>
+			<ns2:ExceptionCode>srk:ExceptionCode</ns2:ExceptionCode>
+			<ns2:ExceptionMessage>srk:ExceptionMessage</ns2:ExceptionMessage>
+			<ns2:Details>srk:Details</ns2:Details>
+		</ns2:Exception>
+	</Body>
+</ns3:messageType>
+*******************
+WARN 2016-03-14 14:10:54,826
+[[JourneyRouteManagement].RouteDispatcher.stage1.02]
+org.mule.api.processor.LoggerMessageProcessor: *****************inside
+route Dispatcher 2<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:messageType xmlns:ns5="http://www.srk.org/MuleMessageModel/"
+	xmlns:ns2="http://www.srk.org/exception/" xmlns:ns4="http://www.srk.org/IVSUserManagement/"
+	xmlns:ns3="http://www.srk.org/IVSJourneyManagement/">
+	<Header>
+		<From>
+			<SenderId>NCName</SenderId>
+			<CreateDateTime>2016-03-14T13:45:05.259+05:30</CreateDateTime>
+		</From>
+		<To>
+			<Recipients>
+				<Recipient>
+					<Type>queue</Type>
+					<Endpoint>srk.user.SessionId</Endpoint>
+				</Recipient>
+				<Recipient>
+					<Type>topic</Type>
+					<Endpoint>srk.topic.journey</Endpoint>
+				</Recipient>
+			</Recipients>
+		</To>
+		<UserSession>
+			<UserId>UserId</UserId>
+			<SessionId>SessionId</SessionId>
+		</UserSession>
+		<MessageProperties>
+			<MessageId>MessageId</MessageId>
+			<Timestamp>2001-12-31T12:00:00</Timestamp>
+			<CorrelationId>CorrelationId</CorrelationId>
+		</MessageProperties>
+		<MessageIdentification>
+			<MessageDomain>Journey</MessageDomain>
+			<MessageType>AuthenticateUser</MessageType>
+			<MessageSubtype>CREATE</MessageSubtype>
+			<MessageEnvironment>DEVELOPMENT</MessageEnvironment>
+		</MessageIdentification>
+		<ESBServices>
+			<serviceName>JourneyRouteMangament</serviceName>
+			<dateTimeIn>2016-03-14T14:10:54.780+05:30</dateTimeIn>
+			<dateTimeOut>2016-03-14T14:10:54.824+05:30</dateTimeOut>
+			<status>SUCCESS</status>
+		</ESBServices>
+	</Header>
+	<Body>
+		<ns2:Exception>
+			<ns2:ExceptionCode>srk:ExceptionCode</ns2:ExceptionCode>
+			<ns2:ExceptionMessage>srk:ExceptionMessage</ns2:ExceptionMessage>
+			<ns2:Details>srk:Details</ns2:Details>
+		</ns2:Exception>
+	</Body>
+</ns3:messageType>
+*******************

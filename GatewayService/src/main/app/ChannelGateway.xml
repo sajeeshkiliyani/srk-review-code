@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wmq="http://www.mulesoft.org/schema/mule/ee/wmq" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/wmq http://www.mulesoft.org/schema/mule/ee/wmq/current/mule-wmq-ee.xsd">
+
+	<mulexml:namespace-manager includeConfigNamespaces="true">
+	   <mulexml:namespace prefix="soapenv" uri="http://schemas.xmlsoap.org/soap/envelope/"/>
+	</mulexml:namespace-manager>
+    <spring:beans>
+        <spring:bean id="resolver" name="resolver" class="com.ars.srk.resolver.schemaResourceResolver"/>
+        <spring:bean id="errorHandler" name="errorHandler" class="com.ars.srk.errorhandler.SchemaErrorHandler"/>
+    </spring:beans>
+    <mulexml:jaxb-context name="JAXB_Context" packageNames="com.ars.srk.gateway" doc:name="JAXB Context"/>
+
+    <flow name="GatewayFlow">
+        <http:listener config-ref="SRK-Shared-http-listener" path="/ESB_C/ChannelGatewayService" doc:name="HTTP"/>
+        <choice doc:name="ignore null payload">
+            <when expression="#[message.payload == null]">
+                <logger message="*********************null payload in channel gateway service *************************" level="WARN" doc:name="Logger"/>
+            </when>
+            <otherwise>
+                <set-payload value="#[xpath3('//soapenv:Envelope/soapenv:Body/*', payload, 'NODE')]" doc:name="set soapBody in payload"/>
+                <set-session-variable variableName="muleMessageModel" value="#[payload]" doc:name="set Session Variable muleMessageModel"/>
+				<set-session-variable variableName="sessionQueue" value="#[&quot;srk.user.&quot;+xpath3('//*:SessionId/text()', payload, 'STRING')]" doc:name="set Session Queue"/>
+				<set-session-variable variableName="correlationID" value="#[xpath3('//*:CorrelationId/text()', payload, 'STRING')]" doc:name="get correlationID"/>
+				<set-property propertyName="MULE_CORRELATION_ID" value="#[sessionVars.correlationID]" doc:name="Set JMSCorrelationID"/> 
+                <logger message="*********************ChannelGateway request session queue  and correlation id  #[sessionVars.correlationID] and #[sessionVars.sessionQueue]*************************" level="WARN" doc:name="Logger"/>
+                <mulexml:dom-to-xml-transformer doc:name="convert Domain object to XML"/>               
+                <message-filter throwOnUnaccepted="true" doc:name="Validate Mule Message Model Request">
+                    <custom-filter class="com.ars.srk.gateway.custom.filter.SchemaValidation"/>
+                </message-filter>               
+                <mulexml:xslt-transformer xsl-file="xslt/MessageToSoapEnvelope.xsl" maxIdleTransformers="2" maxActiveTransformers="5" doc:name="set SoapEnvelope in payload"/>
+            </otherwise>
+        </choice>
+        <cxf:jaxws-service serviceClass="com.ars.srk.gateway.GatewayPortType" doc:name="gatewayService"/>
+        <set-variable variableName="domain" value="#[message.payload.getHeader().getMessageIdentification().getMessageDomain().toString()]" doc:name="set Variable Domain"/>
+        <choice doc:name="Routing based on MessageDomain">
+            <when expression="#[flowVars.domain == 'Journey']">
+                <mulexml:jaxb-object-to-xml-transformer jaxbContext-ref="JAXB_Context" doc:name="convert JAXB Object to JMSMessage type(XML string)" mimeType="text/xml" returnClass="java.lang.String"/>
+                <jms:outbound-endpoint queue="routeProcessor.entry" connector-ref="Shared_ESB_INTERNAL_AMQ_Configuration" doc:name="publish to JourneyRouteManagement"/>
+            </when>
+            <otherwise>
+                <flow-ref name="BusinessErrorHandler" doc:name="InValid Domain Object"/>
+            </otherwise>
+        </choice>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="#[exception.getClass().toString()=='class org.mule.api.routing.filter.FilterUnacceptedException']" doc:name="validation exception">
+                <set-payload value="&lt;EXCEPTION&gt;&lt;MESSAGE&gt;#[message.outboundProperties.SAX_ERROR_PROPERTIES]&lt;/MESSAGE&gt;&lt;/EXCEPTION&gt;" mimeType="text/xml" doc:name="Set validation message as Payload"/>
+                <mulexml:xslt-transformer maxIdleTransformers="2" maxActiveTransformers="5" doc:name="transform  Validation Exception message to muleMessageModel" xsl-file="xslt/ExceptionToMuleMessageModel.xsl">
+                    <mulexml:context-property key="muleMessageModel" value="#[sessionVars.muleMessageModel]"/>
+                    <mulexml:context-property key="exceptionType" value="validation"/>
+                </mulexml:xslt-transformer>
+                <mulexml:dom-to-xml-transformer doc:name="convert validate exception to XML"/>
+                <logger message="*********************ChannelGateway request validation message #[payload]*************************" level="WARN" doc:name="Logger"/>
+                <jms:outbound-endpoint  connector-ref="Shared_SRK_USER_AMQ_Configuration" doc:name="send to srk.user.'session' queue" queue="#[sessionVars.sessionQueue]"/>
+                <set-payload value="#[null]" doc:name="Set null Payload"/>
+            </catch-exception-strategy>
+            <catch-exception-strategy doc:name="any other exception">
+                <set-payload value="&lt;EXCEPTION&gt;&lt;MESSAGE&gt;#[(exception.cause!=null)?(exception.cause.message):exception.message]&lt;/MESSAGE&gt;&lt;/EXCEPTION&gt;" mimeType="text/xml" doc:name="Set general exception message as  Payload"/>
+                <mulexml:xslt-transformer maxIdleTransformers="2" maxActiveTransformers="5" doc:name="transform  General Exception message to muleMessageModel" xsl-file="xslt/ExceptionToMuleMessageModel.xsl">
+                    <mulexml:context-property key="muleMessageModel" value="#[sessionVars.muleMessageModel]"/>
+                    <mulexml:context-property key="exceptionType" value="general"/>
+                </mulexml:xslt-transformer>
+                <mulexml:dom-to-xml-transformer doc:name="convert general exception to XML"/>
+                <logger message="*********************ChannelGateway general exception message #[payload]*************************" level="WARN" doc:name="Logger"/>
+                <jms:outbound-endpoint  connector-ref="Shared_SRK_USER_AMQ_Configuration" doc:name="send to srk.user.'session' queue" queue="#[sessionVars.sessionQueue]"/>
+                <set-payload value="#[null]" doc:name="Set null Payload"/> 
+             </catch-exception-strategy>
+        </choice-exception-strategy>         
+    </flow>
+    <flow name="BusinessErrorHandler">
+    <set-payload value="&lt;EXCEPTION&gt;&lt;MESSAGE&gt;Invalid Domain Object&lt;/MESSAGE&gt;&lt;/EXCEPTION&gt;" mimeType="text/xml" doc:name="Set validation message as Payload"/>
+                <mulexml:xslt-transformer maxIdleTransformers="2" maxActiveTransformers="5" doc:name="transform  Validation Exception message to muleMessageModel" xsl-file="xslt/ExceptionToMuleMessageModel.xsl">
+                    <mulexml:context-property key="muleMessageModel" value="#[sessionVars.muleMessageModel]"/>
+                    <mulexml:context-property key="exceptionType" value="validation"/>
+                </mulexml:xslt-transformer>
+                <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+                <logger message="*********************ChannelGateway request validation message #[payload]*************************" level="WARN" doc:name="Logger"/>
+                <jms:outbound-endpoint  connector-ref="Shared_SRK_USER_AMQ_Configuration" doc:name="send to srk.user.'session' queue" queue="#[sessionVars.sessionQueue]"/>
+                <set-payload value="#[null]" doc:name="Set null Payload"/>
+    
+    </flow>
+</mule>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <mulexml:jaxb-context name="JAXB_Context_Route_Processor" packageNames="com.ars.srk.gateway" doc:name="JAXB Context"/>
+    <flow name="RouteProcessor">
+        <jms:inbound-endpoint queue="routeProcessor.entry" doc:name="routeProcessor.entry" connector-ref="Shared_ESB_INTERNAL_AMQ_Configuration"/>
+        <mulexml:jaxb-xml-to-object-transformer jaxbContext-ref="JAXB_Context_Route_Processor" doc:name="convert JMS message  to JAXB Object"/>
+        <custom-transformer   class="com.ars.srk.journeyroute.custom.transformer.InboundMetadataTransformer" doc:name="update inbound Message Header "/>
+        <choice doc:name="Route based on MessageType">
+            <when expression="#[message.payload== null]">
+                <logger message="********* null payload *************" level="WARN" doc:name="Logger"/>
+            </when>
+            <otherwise>
+                <logger message="************inside route processor #[message.payload] ****************" level="WARN" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+        <mulexml:jaxb-object-to-xml-transformer returnClass="java.lang.String" mimeType="text/xml" jaxbContext-ref="JAXB_Context_Route_Processor" doc:name="convert JAXB Object to JMSMessage (XML string)"/>
+        <jms:outbound-endpoint doc:name="routeDispatcher.entry" queue="routeDispatcher.entry" connector-ref="Shared_ESB_INTERNAL_AMQ_Configuration"/>
+    </flow>
+</mule>

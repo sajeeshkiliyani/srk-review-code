@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <mulexml:jaxb-context name="JAXB_Context_Route_Dispatcher" packageNames="com.ars.srk.gateway" doc:name="JAXB Context"/>
+    <flow name="RouteDispatcher">
+        <jms:inbound-endpoint doc:name="routeDispatcher.entry" queue="routeDispatcher.entry" connector-ref="Shared_ESB_INTERNAL_AMQ_Configuration"/>
+        <logger message="*****************inside route Dispatcher 1#[message.payload] *******************" level="WARN" doc:name="Logger"/>
+        <mulexml:jaxb-xml-to-object-transformer jaxbContext-ref="JAXB_Context_Route_Dispatcher" doc:name="convert JMS message to JAXB Object"/>
+        <custom-transformer   class="com.ars.srk.journeyroute.custom.transformer.OutboundMetadataTransformer" doc:name="update outbound Message Header "/>
+        <mulexml:jaxb-object-to-xml-transformer returnClass="java.lang.String" mimeType="text/xml" jaxbContext-ref="JAXB_Context_Route_Dispatcher" doc:name="convert JAXB Object to JMSMessage (XML string)"/>
+        <logger message="*****************inside route Dispatcher 2#[message.payload] *******************" level="WARN" doc:name="Logger"/>
+        
+    </flow>
+    
+</mule>

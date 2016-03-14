@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.srk.org/exception/"
+	xmlns:srk="http://www.srk.org/exception/" elementFormDefault="qualified">
+
+    <complexType name="ExceptionType">
+		<sequence>
+			<element name="ExceptionCode" type="string" maxOccurs="1"
+				minOccurs="1"></element>
+			<element name="ExceptionMessage" type="string" maxOccurs="1"
+				minOccurs="1"></element>
+			<element name="Details" type="string" maxOccurs="1"
+				minOccurs="1"></element>
+		</sequence>
+	</complexType>
+	<element name="Exception" type="srk:ExceptionType"/>
+</schema>

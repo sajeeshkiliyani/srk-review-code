@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.srk.org/MuleMessageModel/"
+	xmlns:esb_msg="http://www.srk.org/MuleMessageModel/"
+    xmlns:user_msg="http://www.srk.org/IVSUserManagement/" 
+    xmlns:journey_msg="http://www.srk.org/IVSJourneyManagement/"
+    xmlns:exception_msg="http://www.srk.org/exception/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://www.srk.org/MuleMessageModel/">
+   
+     <xs:import namespace="http://www.srk.org/IVSJourneyManagement/" schemaLocation="JourneyManagementModel.xsd"/>
+     <xs:import namespace="http://www.srk.org/IVSUserManagement/" schemaLocation="UserManagementModel.xsd"/>
+     <xs:import namespace="http://www.srk.org/exception/" schemaLocation="SRKException.xsd"/>
+     
+        <xs:complexType  name="MessageType">
+            <xs:sequence>
+                <xs:element name="Header" type="esb_msg:HeaderType" maxOccurs="1" minOccurs="1"/>
+                <xs:element name="Body" type="esb_msg:BodyType" maxOccurs="1" minOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+        
+     <xs:complexType name="HeaderType">
+            <xs:sequence>
+                <xs:element name="From" type="esb_msg:FromType" maxOccurs="1" minOccurs="1"/>
+                <xs:element name="To" type="esb_msg:ToType" maxOccurs="1" minOccurs="0"/>
+                <xs:element name="UserSession" type="esb_msg:UserSessionType" maxOccurs="1" minOccurs="1" />
+                <xs:element name="MessageProperties" type="esb_msg:MessagePropertiesType" maxOccurs="1" minOccurs="1"/>
+                <xs:element name="MessageIdentification" type="esb_msg:MessageIdentificationType" maxOccurs="1" minOccurs="1"/>
+                <xs:element name="ESBServices" type="esb_msg:ESBServicesType" maxOccurs="1" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+       
+        <xs:complexType  name="FromType">
+            <xs:sequence>              
+                <xs:element name="SenderId" type="xs:NCName" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="CreateDateTime" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>  
+        
+         <xs:complexType name="ToType">
+            <xs:sequence>
+                <xs:element name="Recipients" type="RecipientsType" minOccurs="1" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+        
+        <xs:complexType name="RecipientsType">
+            <xs:sequence>
+                <xs:element name="Recipient" type="RecipientType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+        
+        <xs:complexType name="RecipientType">
+            <xs:sequence>
+               <xs:element name="Type"  type="xs:string" maxOccurs="1" minOccurs="1"/>
+               <xs:element name="Endpoint"  type="xs:string" maxOccurs="1" minOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+        
+         <xs:complexType name="UserSessionType">
+            <xs:sequence>
+                <xs:element name="UserId" minOccurs="1" maxOccurs="1">
+                	<xsd:simpleType>
+                		<xsd:restriction base="xsd:string">
+                			<xsd:minLength value="1"></xsd:minLength>
+                		</xsd:restriction>
+                	</xsd:simpleType>
+                </xs:element>
+                <xs:element name="SessionId" minOccurs="1"
+                	maxOccurs="1">
+                	<xsd:simpleType>
+                		<xsd:restriction base="xsd:string">
+                			<xsd:minLength value="1"></xsd:minLength>
+                		</xsd:restriction>
+                	</xsd:simpleType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+        
+        <xs:complexType name="MessagePropertiesType">
+            <xs:sequence>
+                <xs:element name="MessageId" maxOccurs="1"
+                	minOccurs="1">
+                	<xsd:simpleType>
+                		<xsd:restriction base="xsd:string">
+                			<xsd:minLength value="1"></xsd:minLength>
+                		</xsd:restriction>
+                	</xsd:simpleType>
+                </xs:element>
+                <xs:element name="Timestamp" minOccurs="1">
+                	<xs:simpleType>
+                		<xs:restriction base="xsd:dateTime">
+
+                		</xs:restriction>
+                	</xs:simpleType>
+                </xs:element>
+                <xs:element name="CorrelationId" maxOccurs="1"
+                	minOccurs="1">
+                	<xsd:simpleType>
+                		<xsd:restriction base="xsd:string">
+                			<xsd:minLength value="1"></xsd:minLength>
+                		</xsd:restriction>
+                	</xsd:simpleType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+        
+   
+        <xs:complexType name="MessageIdentificationType">
+            <xs:sequence>
+                <xs:element name="MessageDomain" minOccurs="1" maxOccurs="1">
+                   <xs:simpleType>
+                   	<xs:restriction base="xsd:string">
+                   		<xs:enumeration value="User" />
+                   		<xs:enumeration value="Journey" />
+                   		<!-- add as you like more domains-->
+                   		<xsd:minLength value="1"></xsd:minLength>
+                   	</xs:restriction>
+                   </xs:simpleType>
+                </xs:element>
+				
+              <xs:element name="MessageType" minOccurs="1" maxOccurs="1">
+               <xs:simpleType>
+               	<xs:restriction base="xs:string">
+               		<xs:enumeration value="AuthenticateUser" />
+               		<xs:enumeration value="TraceCentreRoleChange" />
+               		<xs:enumeration value="LogoutUser" />
+               		<xs:enumeration value="GetListDefinitions" />
+               		<xs:enumeration value="ManageJourney" />
+               		<xs:enumeration value="ListJourneys" />
+               		<xs:enumeration value="ListVessels" />
+               		<xs:enumeration value="GetViapoints" />
+               		<xs:enumeration value="GetDeviations" />
+               		<xs:enumeration value="SetViapoints" />
+               		<xs:enumeration value="SetDeviations" />
+               		<xs:enumeration value="ListRoutes" />
+               		<!-- Add more types as needed -->
+               		<xsd:minLength value="1"></xsd:minLength>
+               	</xs:restriction>
+               </xs:simpleType>
+              </xs:element>
+				
+			<xs:element name="MessageSubtype"  minOccurs="1" maxOccurs="1">				
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="CREATE" />
+						<xs:enumeration value="EDIT" />
+						<xs:enumeration value="REMOVE" />
+						<xs:enumeration value="VIAPOINT"/>
+					    <xs:enumeration value="DEVIATION"/>
+						<xs:enumeration value="NA" />						
+						<!-- Add more types as needed -->
+						<xsd:minLength value="1"></xsd:minLength>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+					
+				<xs:element name="MessageEnvironment" minOccurs="0"	maxOccurs="1">
+				   <xs:simpleType>
+		            <xs:restriction base="xs:string">
+		                <xs:enumeration value="DEVELOPMENT"/>
+		                <xs:enumeration value="TEST"/>
+		                <xs:enumeration value="UAT"/>
+		                <xs:enumeration value="PRODUCTION"/>
+		            </xs:restriction>
+                   </xs:simpleType>
+				</xs:element>
+				
+            </xs:sequence>
+        </xs:complexType>
+        
+        <xs:complexType name="ESBServicesType" >
+            <xs:sequence>
+                <xs:element name="serviceName" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="dateTimeIn" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="dateTimeOut"  type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="status" minOccurs="1" maxOccurs="1">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+	                <xs:enumeration value="SUCCESS"/>
+	                <xs:enumeration value="IN_PROGRESS"/>
+	                <xs:enumeration value="FAILED"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+               
+            </xs:sequence>
+        </xs:complexType>
+        
+        
+         <xs:complexType name="BodyType">
+            <xs:choice>            
+                <xs:element ref="exception_msg:Exception" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:MANAGE_JOURNEY_REQUEST" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:MANAGE_JOURNEY_RESPONSE" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:LIST_JOURNEYS_REQUEST" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:LIST_JOURNEYS_RESPONSE" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:LIST_VESSELS_REQUEST" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="journey_msg:LIST_VESSELS_RESPONSE" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="user_msg:UserAuthenticationRequest" minOccurs="0" maxOccurs="1"/>                
+                <xs:element ref="user_msg:UserAuthenticationResponse" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="user_msg:UserLogoutRequest" minOccurs="0" maxOccurs="1"/>                
+                <xs:element ref="user_msg:UserLogoutResponse" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="user_msg:ChangeCenterOrRoleRequest" minOccurs="0" maxOccurs="1"/>                
+                <xs:element ref="user_msg:ChangeCenterOrRoleResponse" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="user_msg:GetListDefinitionResponse" minOccurs="0" maxOccurs="1"/>
+            </xs:choice>
+        </xs:complexType>
+
+         <xsd:element name="Message" type="esb_msg:MessageType"></xsd:element>
+</xsd:schema>

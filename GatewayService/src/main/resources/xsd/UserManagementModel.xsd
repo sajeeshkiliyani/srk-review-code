@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.srk.org/IVSUserManagement/"
+	xmlns:ivs="http://www.srk.org/IVSUserManagement/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://www.srk.org/IVSUserManagement/">
+
+	<xsd:complexType name="AuthenticationRequestType">
+		<xsd:sequence>
+			<xsd:element name="UserName" minOccurs="1" maxOccurs="1">
+
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"></xsd:minLength>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="Password" maxOccurs="1" minOccurs="1">
+
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"></xsd:minLength>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+
+
+
+
+		</xsd:sequence>
+	</xsd:complexType>
+               
+      
+		<xsd:complexType name="UserLogoutInfoType">
+			<xsd:sequence>
+				<xsd:element name="UserName" maxOccurs="1" minOccurs="1">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:minLength value="1"></xsd:minLength>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+
+
+				<xsd:element name="SessionID" maxOccurs="1" minOccurs="1">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:minLength value="1"></xsd:minLength>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+		
+		<xsd:complexType name="ChangeCenterOrRoleNotificationType">
+			<xsd:sequence>
+
+
+
+
+
+
+
+				<xsd:element name="CenterID" maxOccurs="1"
+					minOccurs="1">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:minLength value="1"></xsd:minLength>
+							<xsd:maxLength value="3"></xsd:maxLength>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="RoleID" maxOccurs="1"
+					minOccurs="1">
+
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:int">
+
+							<xsd:minInclusive value="1"></xsd:minInclusive>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+		
+		
+        <xsd:element name="UserAuthenticationRequest" 
+            type="ivs:AuthenticationRequestType"/>
+                    
+		<xsd:element name="UserLogoutRequest"
+			type="ivs:UserLogoutInfoType">
+		</xsd:element>
+
+		<xsd:element name="ChangeCenterOrRoleRequest"
+			type="ivs:ChangeCenterOrRoleNotificationType">
+		</xsd:element>
+		
+		
+		<xs:element name="UserAuthenticationResponse"
+  	type="ivs:UserAuthenticationResponseType">
+  </xs:element>
+  <xs:complexType name="UserAuthenticationResponseType">
+      <xs:sequence>
+        <xs:element name="IVSUser">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="UserName"/>
+              <xs:element type="xs:byte" name="UserId"/>
+              <xs:element type="xs:string" name="FirstName"/>
+              <xs:element type="xs:string" name="LastName"/>
+              <xs:element type="xs:string" name="AccountStatus"/>
+              <xs:element type="xs:dateTime" name="LastLoginTime"/>
+              <xs:element type="xs:string" name="DefaultCentre"/>
+              <xs:element name="Centres">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Centre" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="CentreName"/>
+                          <xs:element type="xs:string" name="CentreID"/>
+                          <xs:element type="xs:byte" name="IsOperational"/>
+                          <xs:element type="xs:float" name="XPosition"/>
+                          <xs:element type="xs:float" name="YPosition"/>
+                          <xs:element type="xs:string" name="DefaultArea"/>
+                          <xs:element name="Roles">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Role" maxOccurs="unbounded" minOccurs="0">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element type="xs:string" name="RoleName"/>
+                                      <xs:element type="xs:byte" name="RoleID"/>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+   <xs:complexType name="ListDefinitionGetReponseType">
+      <xs:sequence>
+
+      	<xs:element name="ListDefinitions" type="ivs:ListDefinitions"
+      		maxOccurs="1" minOccurs="0">
+      	</xs:element>
+      </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ListDefinition">
+  	<xs:sequence>
+  		<xs:element name="ID" type="xs:string" maxOccurs="1"
+  			minOccurs="1">
+  		</xs:element>
+  		<xs:element name="Name" type="xs:string" maxOccurs="1"
+  			minOccurs="1">
+  		</xs:element>
+  		<xs:element name="AllowedCentreRoles"
+  			type="ivs:MultipleCentreRoleType" maxOccurs="1" minOccurs="0">
+  		</xs:element>
+
+  		<xs:element name="Description" type="xs:string" maxOccurs="1"
+  			minOccurs="0">
+  		</xs:element>
+  		<xs:element name="LabelCode" type="xs:string" maxOccurs="1"
+  			minOccurs="1">
+  		</xs:element>
+  		<xs:element name="ColumnIDs" type="ivs:ColumnIDType"
+  			maxOccurs="1" minOccurs="0">
+  		</xs:element>
+  		<xs:element name="IsDefault" maxOccurs="1" minOccurs="1">
+  			<xs:simpleType>
+  				<xs:restriction base="xs:string">
+  					<xs:minLength value="1"></xs:minLength>
+  				</xs:restriction>
+  			</xs:simpleType>
+  		</xs:element>
+  	</xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CentreRoleType">
+  	<xs:sequence>
+  		<xs:element name="CentreID" type="xs:string"
+  			maxOccurs="1" minOccurs="1">
+  		</xs:element>
+  		<xs:element name="RoleID" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>
+  	</xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name="ColumnIDType">
+  	<xs:sequence>
+  		<xs:element name="ColumnID" type="xs:string" maxOccurs="unbounded" minOccurs="0"></xs:element>
+  	</xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ListDefinitions">
+  	<xs:sequence>
+  		<xs:element name="ListDefinition"
+  			type="ivs:ListDefinition" maxOccurs="unbounded" minOccurs="0">
+  		</xs:element>
+  	</xs:sequence>
+  </xs:complexType>
+  
+   <xs:element name="GetListDefinitionResponse"
+  	type="ivs:ListDefinitionGetReponseType">
+  </xs:element>
+
+   <xs:element name="ChangeCenterOrRoleResponse"
+   	type="ivs:ChangeCenterOrRoleResponseType">
+   </xs:element>
+   
+    <xs:element name="UserLogoutResponse"
+    	type="ivs:UserLogoutResponseType">
+    </xs:element>
+    
+    <xs:complexType name="UserLogoutResponseType">
+    	<xs:sequence>
+    		<xs:element name="Status" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>
+    		<xs:element name="Message" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>
+    		<xs:element name="UserName" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>
+            <xs:element name="SessionID" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>    		
+    	</xs:sequence>
+    </xs:complexType>
+        <xs:complexType name="ChangeCenterOrRoleResponseType">
+    	<xs:sequence>
+
+
+
+
+            <xs:element name="CentreID" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>
+            <xs:element name="RoleID" type="xs:string" maxOccurs="1" minOccurs="1"></xs:element>               		
+    	</xs:sequence>
+    </xs:complexType>
+
+        <xs:complexType name="MultipleCentreRoleType">
+        	<xs:sequence>
+        		<xs:element name="CentreRole"
+        			type="ivs:CentreRoleType" maxOccurs="unbounded" minOccurs="0">
+        		</xs:element>
+        	</xs:sequence>
+        </xs:complexType>
+
+</xsd:schema>
